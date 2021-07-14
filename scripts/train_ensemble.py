@@ -8,7 +8,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Activation, LSTM, GRU, SimpleRNN
 from keras.layers import Bidirectional, MaxPooling1D, Conv1D, Reshape, Dropout, Flatten
-from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
+from keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping # , TensorBoard
 from sklearn.model_selection import StratifiedKFold
 from imblearn.over_sampling import SMOTE # pip install imbalanced-learn
 import scipy.stats as sp
@@ -54,7 +54,7 @@ SETTING_FILE_PATH = DATA_DIR_PATH + "/setting.conf"
 # {reference equation: k = log(n) / log(2)}
 FOLDS_NUMBER = 10
 
-# EARLY_STOPPING_PATIENCE = 100
+EARLY_STOPPING_PATIENCE = 0
 
 # Hyper Parameter
 RNN_HIDDEN_NEURONS = 64 # 32 # RNN層のユニット数 default 20
@@ -397,20 +397,25 @@ if __name__ == "__main__":
 
                 now = datetime.datetime.now()
 
-                # fpath = LOG_DIR_PATH + "/" + model_name + "/ensemble_{}/".format(index + 1) + model_name + "_{0:%Y-%m-%d-%H-%M-%S}".format(now) + "_ensemble_{}".format(index + 1) + "_pre_process_model_" + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
-                # cp_cb = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
-                # es_cb = EarlyStopping(monitor='val_loss', patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
-                # tb_cb = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1), histogram_freq=0, write_graph=True)
+                csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/"  + 'log_acc_loss.csv', append=False)
+                fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_pre_process_model." + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
+                model_checkpoint = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='min', period=0)
+                early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
+                # tensorboard = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name, histogram_freq=0, write_graph=True)
 
-                hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1) # , callbacks=[cp_cb, tb_cb]) # , es_cb])
+                hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1, callbacks=[model_checkpoint, early_stopping]) # , tensorboard])
 
-                # Evaluate
+            # Evaluate
                 scores = model.evaluate(X[test], y[test], verbose=0)
                 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
                 cvscores.append(scores[1] * 100)
 
                 if not os.path.isdir(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1)):
                     os.makedirs(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1))
+
+                for i in model.layers:
+                    if type(i) is Dropout:
+                        model.layers.remove(i)
 
                 # Save the model
                 model.save(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}/".format(index + 1) + model_name + "_{0:%Y-%m-%d-%H-%M-%S}".format(now) + "_ensemble_{}".format(index + 1) + "_final_{}_model_".format(EPOCHS) + "{0:02d}".format(fld + 1) + "_" + str(round(scores[1] * 100, 1)) + ".h5")
