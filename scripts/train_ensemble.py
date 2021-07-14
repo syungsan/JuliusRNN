@@ -395,10 +395,13 @@ if __name__ == "__main__":
                 model = None # Clearing the NN.
                 model = create_model(model_name, time_series_max_length)
 
+                if not os.path.isdir(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1)):
+                    os.makedirs(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1))
+
                 now = datetime.datetime.now()
 
                 csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/log_acc_loss.csv", append=False)
-                fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_pre_process_model." + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
+                fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_ensemble_{}".format(index + 1) + "_pre_process_model_" + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
                 model_checkpoint = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='min', period=0)
                 # early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
                 # tensorboard = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name, histogram_freq=0, write_graph=True)
@@ -409,9 +412,6 @@ if __name__ == "__main__":
                 scores = model.evaluate(X[test], y[test], verbose=0)
                 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
                 cvscores.append(scores[1] * 100)
-
-                if not os.path.isdir(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1)):
-                    os.makedirs(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1))
 
                 for i in model.layers:
                     if type(i) is Dropout:

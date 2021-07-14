@@ -371,10 +371,13 @@ if __name__ == "__main__":
             model = None # Clearing the NN.
             model = create_model(model_name, time_series_max_length)
 
+            if not os.path.isdir(LOG_DIR_PATH + "/" + model_name):
+                os.makedirs(LOG_DIR_PATH + "/" + model_name)
+
             now = datetime.datetime.now()
 
             csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/log_acc_loss.csv", append=False)
-            fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_pre_process_model." + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
+            fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_single_pre_process_model_" + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
             # cp_cb = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
             model_checkpoint = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='min', period=0)
             # es_cb = EarlyStopping(monitor='val_loss', patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
@@ -388,15 +391,12 @@ if __name__ == "__main__":
             print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
             cvscores.append(scores[1] * 100)
 
-            if not os.path.isdir(LOG_DIR_PATH + "/" + model_name):
-                os.makedirs(LOG_DIR_PATH + "/" + model_name)
-
             for i in model.layers:
                 if type(i) is Dropout:
                     model.layers.remove(i)
 
             # Save the model
-            model.save(LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_final" + "{0:02d}".format(fld + 1) + "_" + str(round(scores[1] * 100, 1)) + "%_model.h5")
+            model.save(LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_single_final_{}_model_".format(EPOCHS) + "{0:02d}".format(fld + 1) + "_" + str(round(scores[1] * 100, 1)) + "%_model.h5")
 
             for epoch in range(0, EPOCHS):
                 train_acc_d[epoch][fld] = hist.history["accuracy"][epoch]
