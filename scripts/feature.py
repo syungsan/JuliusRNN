@@ -41,8 +41,7 @@ CLASS_LABELS = [0, 1]
 WAV_LABELS = ["bad", "ok"]
 
 # Command
-SEGMENTATION_COMMAND = \
-    BASE_ABSOLUTE_PATH + "perl/bin/perl.exe " + BASE_ABSOLUTE_PATH + "scripts/segment_julius.pl"
+SEGMENTATION_COMMAND = BASE_ABSOLUTE_PATH + "perl/bin/perl.exe " + BASE_ABSOLUTE_PATH + "scripts/segment_julius.pl"
 
 # 正誤各waveファイルの最大保持設定数
 MAX_WAV_COUNT = 3000
