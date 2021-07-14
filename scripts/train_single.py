@@ -49,7 +49,7 @@ SETTING_FILE_PATH = DATA_DIR_PATH + "/setting.conf"
 # {reference equation: k = log(n) / log(2)}
 FOLDS_NUMBER = 10
 
-EARLY_STOPPING_PATIENCE = 0
+# EARLY_STOPPING_PATIENCE = 0
 
 # Hyper Parameter
 RNN_HIDDEN_NEURONS = 64 # 32 # RNN層のユニット数 default 20
@@ -373,15 +373,15 @@ if __name__ == "__main__":
 
             now = datetime.datetime.now()
 
-            csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/"  + 'log_acc_loss.csv', append=False)
+            csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/log_acc_loss.csv", append=False)
             fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_pre_process_model." + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
             # cp_cb = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
             model_checkpoint = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='min', period=0)
             # es_cb = EarlyStopping(monitor='val_loss', patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
-            early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
+            # early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
             # tensorboard = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name, histogram_freq=0, write_graph=True)
 
-            hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1, callbacks=[model_checkpoint, early_stopping]) # , tensorboard])
+            hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1, callbacks=[model_checkpoint]) # , early_stopping]) # , tensorboard])
 
             # Evaluate
             scores = model.evaluate(X[test], y[test], verbose=0)
