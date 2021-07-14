@@ -122,9 +122,17 @@ if __name__ == "__main__":
 
             model_dir_path = LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(ensemble_number + 1)
 
-            os.chdir(model_dir_path)
-            # model_paths = glob.glob("*_final*.h5")
-            model_paths = glob.glob("*.h5")
+            # データが多すぎるので10飛ばしに絞る
+            final_model_paths = glob.glob("/{}/*_final_*.h5".format(model_dir_path))
+            pre_process_model_paths = glob.glob("/{}/*_pre_process_model_*.h5".format(model_dir_path))
+
+            model_paths = []
+            model_paths.extend(final_model_paths)
+
+            for index in range(10, len(pre_process_model_paths), 10):
+                model_paths.append([s for s in pre_process_model_paths if "pre_process_model_*-{}".format("{0:02d}".format(index + 1)) in s])
+
+            print(model_paths)
 
             print("\n")
             print("Model type name : %s and Ensemble number : %s" % (model_name, ensemble_number + 1))
