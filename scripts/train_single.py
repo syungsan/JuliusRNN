@@ -384,7 +384,7 @@ if __name__ == "__main__":
             # early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
             # tensorboard = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name, histogram_freq=0, write_graph=True)
 
-            hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1, callbacks=[model_checkpoint]) # , early_stopping]) # , tensorboard])
+            hist = model.fit(X[train], y[train], validation_data=(X[test], y[test]), batch_size=BATCH_SIZE, epochs=EPOCHS, verbose=1, callbacks=[csv_logger, model_checkpoint]) # , early_stopping]) # , tensorboard])
 
             # Evaluate
             scores = model.evaluate(X[test], y[test], verbose=0)
