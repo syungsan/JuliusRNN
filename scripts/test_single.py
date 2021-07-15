@@ -8,6 +8,7 @@ import csv
 import codecs
 import scipy.stats as sp
 import glob
+import fnmatch
 
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 import roc_pr_curve as roc_pr
@@ -20,6 +21,7 @@ for device in gpu_devices:
 
 
 FEATURE_MAX_LENGTH = 40
+EPOCHS = 500
 
 MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "Bidirectional_LSTM", "BiLSTMStack", "CNN_RNN_BiLSTM"]
 
@@ -118,16 +120,17 @@ if __name__ == "__main__":
         model_dir_path = LOG_DIR_PATH + "/" + model_name
 
         # データが多すぎるので10飛ばしに絞る
-        final_model_paths = glob.glob("/{}/*_final_*.h5".format(model_dir_path))
-        pre_process_model_paths = glob.glob("/{}/*_pre_process_model_*.h5".format(model_dir_path))
+        final_model_paths = glob.glob("{}/*_final_*.h5".format(model_dir_path))
+        pre_process_model_paths = glob.glob("{}/*_pre_process_model_*.h5".format(model_dir_path))
+        # print(pre_process_model_paths)
 
         model_paths = []
         model_paths.extend(final_model_paths)
 
-        for index in range(10, len(pre_process_model_paths), 10):
-            model_paths.append([s for s in pre_process_model_paths if "pre_process_model_*-{}".format("{0:02d}".format(index + 1)) in s])
+        for i in range(int(len(pre_process_model_paths) / EPOCHS)):
+            for j in range(10, int(len(pre_process_model_paths) / 10), 10):
 
-        print(model_paths)
+                model_paths.extend(fnmatch.filter(pre_process_model_paths, "*pre_process_model_{}-{}-*".format("{0:02d}".format(i + 1), "{0:02d}".format(j))))
 
         print("\n")
         print("Model Type Name : %s" % model_name)

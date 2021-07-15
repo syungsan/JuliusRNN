@@ -9,6 +9,7 @@ import codecs
 import scipy.stats as sp
 import glob
 import shutil
+import fnmatch
 
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 import roc_pr_curve as roc_pr
@@ -21,7 +22,7 @@ for device in gpu_devices:
 
 
 FEATURE_MAX_LENGTH = 40
-
+EPOCHS = 500
 ENSEMBLE_NUMBER = 5
 
 # MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "GRU", "Bidirectional_LSTM", "Bidirectional_GRU", "BiLSTMStack", "BiGRUStack", "CNN_RNN_BiLSTM", "CNN_RNN_BiGRU"]
@@ -129,10 +130,10 @@ if __name__ == "__main__":
             model_paths = []
             model_paths.extend(final_model_paths)
 
-            for index in range(10, len(pre_process_model_paths), 10):
-                model_paths.append([s for s in pre_process_model_paths if "pre_process_model_*-{}".format("{0:02d}".format(index + 1)) in s])
+            for i in range(int(len(pre_process_model_paths) / EPOCHS)):
+                for j in range(10, int(len(pre_process_model_paths) / 10), 10):
 
-            print(model_paths)
+                    model_paths.extend(fnmatch.filter(pre_process_model_paths, "*pre_process_model_{}-{}-*".format("{0:02d}".format(i + 1), "{0:02d}".format(j))))
 
             print("\n")
             print("Model type name : %s and Ensemble number : %s" % (model_name, ensemble_number + 1))
