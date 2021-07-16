@@ -25,8 +25,11 @@ FEATURE_MAX_LENGTH = 40
 EPOCHS = 500
 ENSEMBLE_NUMBER = 5
 
+THINNING_OUT_NUMBER = 50
+FOLDS_NUMBER = 10
+
 # MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "GRU", "Bidirectional_LSTM", "Bidirectional_GRU", "BiLSTMStack", "BiGRUStack", "CNN_RNN_BiLSTM", "CNN_RNN_BiGRU"]
-MODEL_NAMES = ["SimpleRNNStack"]
+MODEL_NAMES = ["BiLSTMStack"]
 
 # Path
 BASE_ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__)) + "/../"
@@ -101,6 +104,8 @@ if __name__ == "__main__":
     setting = read_csv(file_path=SETTING_FILE_PATH, delimiter=",")
     time_series_max_length = len(setting[0][2])
 
+    os.makedirs(LOG_DIR_PATH + "/ensemble_models", exist_ok=True)
+
     if not os.path.exists(BEST_MODELS_FILE_PATH):
         best_model_labels = [["model_name", "ensemble_number", "max_accuracy", "min_loss", "precision", "recall", "f1", "roc_auc", "pr_auc", "best_model_name"]]
         write_csv(BEST_MODELS_FILE_PATH, best_model_labels)
@@ -131,7 +136,7 @@ if __name__ == "__main__":
             model_paths.extend(final_model_paths)
 
             for i in range(int(len(pre_process_model_paths) / EPOCHS)):
-                for j in range(10, int(len(pre_process_model_paths) / 10), 10):
+                for j in range(THINNING_OUT_NUMBER, int(len(pre_process_model_paths) / FOLDS_NUMBER), THINNING_OUT_NUMBER):
 
                     model_paths.extend(fnmatch.filter(pre_process_model_paths, "*pre_process_model_{}-{}-*".format("{0:02d}".format(i + 1), "{0:02d}".format(j))))
 
@@ -186,7 +191,7 @@ if __name__ == "__main__":
                 # if not os.path.isdir(best_ensemble_models_dir_path):
                 #     os.makedirs(best_ensemble_models_dir_path)
 
-                best_ensemble_model_path = LOG_DIR_PATH + "/" + model_name + "/ensemble/" + best_model_name
+                best_ensemble_model_path = LOG_DIR_PATH + "/ensemble_models/" + best_model_name
                 shutil.copy(best_model_path, best_ensemble_model_path)
 
                 model = load_model(best_model_path)

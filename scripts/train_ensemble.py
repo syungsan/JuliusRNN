@@ -62,7 +62,7 @@ BATCH_SIZE = 32 # [1, 8, 16, 32, 64, 128, 256, 512]
 EPOCHS = 500 # 100 # 学習回数
 
 # MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "GRU", "Bidirectional_LSTM", "Bidirectional_GRU", "BiLSTMStack", "BiGRUStack", "CNN_RNN_BiLSTM", "CNN_RNN_BiGRU", "QRNN"]
-MODEL_NAMES = ["SimpleRNNStack"]
+MODEL_NAMES = ["BiLSTMStack"]
 
 
 def read_csv(file_path, delimiter):
@@ -400,8 +400,8 @@ if __name__ == "__main__":
 
                 now = datetime.datetime.now()
 
-                csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/log_acc_loss.csv", append=False)
-                fpath = LOG_DIR_PATH + "/" + model_name + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_ensemble_{}".format(index + 1) + "_pre_process_model_" + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
+                csv_logger = CSVLogger(LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1) + "/log_acc_loss.csv", append=False)
+                fpath = LOG_DIR_PATH + "/" + model_name + "/ensemble_{}".format(index + 1) + "/" + model_name + "_{0:%Y-%m-%d}".format(now) + "_ensemble_{}".format(index + 1) + "_pre_process_model_" + "{0:02d}".format(fld + 1) + "-{epoch:02d}-{loss:.2f}-{val_loss:.2f}-{accuracy:.2f}-{val_accuracy:.2f}.h5"
                 model_checkpoint = ModelCheckpoint(filepath=fpath, monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='min', period=0)
                 # early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=EARLY_STOPPING_PATIENCE, verbose=1, mode='auto')
                 # tensorboard = TensorBoard(log_dir=LOG_DIR_PATH + "/" + model_name, histogram_freq=0, write_graph=True)

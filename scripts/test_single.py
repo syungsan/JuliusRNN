@@ -8,6 +8,7 @@ import csv
 import codecs
 import scipy.stats as sp
 import glob
+import shutil
 import fnmatch
 
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
@@ -22,6 +23,9 @@ for device in gpu_devices:
 
 FEATURE_MAX_LENGTH = 40
 EPOCHS = 500
+
+THINNING_OUT_NUMBER = 50
+FOLDS_NUMBER = 10
 
 MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "Bidirectional_LSTM", "BiLSTMStack", "CNN_RNN_BiLSTM"]
 
@@ -98,6 +102,8 @@ if __name__ == "__main__":
     setting = read_csv(file_path=SETTING_FILE_PATH, delimiter=",")
     time_series_max_length = len(setting[0][2])
 
+    os.makedirs(LOG_DIR_PATH + "/single_models", exist_ok=True)
+
     if not os.path.exists(BEST_MODELS_FILE_PATH):
         best_model_labels = [["model_type", "max_accuracy", "min_loss", "precision", "recall", "f1", "roc_auc", "pr_auc", "best_model_name"]]
         write_csv(BEST_MODELS_FILE_PATH, best_model_labels)
@@ -128,7 +134,7 @@ if __name__ == "__main__":
         model_paths.extend(final_model_paths)
 
         for i in range(int(len(pre_process_model_paths) / EPOCHS)):
-            for j in range(10, int(len(pre_process_model_paths) / 10), 10):
+            for j in range(THINNING_OUT_NUMBER, int(len(pre_process_model_paths) / FOLDS_NUMBER), THINNING_OUT_NUMBER):
 
                 model_paths.extend(fnmatch.filter(pre_process_model_paths, "*pre_process_model_{}-{}-*".format("{0:02d}".format(i + 1), "{0:02d}".format(j))))
 
@@ -177,6 +183,9 @@ if __name__ == "__main__":
             best_model_path = model_paths[best_model_index]
             best_model_name = os.path.basename(best_model_path)
             print("\n最大Accuracy = %f ; at loss = %f => %s" % (max_accuracy * 100, losss[best_model_index], best_model_name))
+
+            best_single_model_path = LOG_DIR_PATH + "/single_models/" + best_model_name
+            shutil.copy(best_model_path, best_single_model_path)
 
             model = load_model(best_model_path)
 

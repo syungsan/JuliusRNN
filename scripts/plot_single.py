@@ -6,7 +6,6 @@ import sqlite3
 import os
 import codecs
 import csv
-import shutil
 
 
 WINDOW_TITLE = "Graph View of JuliusRNN"

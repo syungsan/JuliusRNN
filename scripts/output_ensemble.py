@@ -124,7 +124,7 @@ if __name__ == "__main__":
     ENSEMBLE_NUMBER = 5
 
     # MODEL_NAMES = ["SimpleRNN", "SimpleRNNStack", "LSTM", "GRU", "Bidirectional_LSTM", "Bidirectional_GRU", "BiLSTMStack", "BiGRUStack", "CNN_RNN_BiLSTM", "CNN_RNN_BiGRU"]
-    MODEL_NAMES = ["SimpleRNNStack"]
+    MODEL_NAMES = ["BiLSTMStack"]
 
     setting = read_csv(file_path=SETTING_FILE_PATH, delimiter=",")
     time_series_max_length = len(setting[0][2])
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     for model_name in MODEL_NAMES:
 
-        model_paths = glob.glob("{}/{}/ensemble/*.h5".format(LOG_DIR_PATH, model_name))
+        model_paths = glob.glob("{}/ensemble_models/*.h5".format(LOG_DIR_PATH))
 
         models = []
         for model_path in model_paths:
